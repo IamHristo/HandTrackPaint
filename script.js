@@ -41,17 +41,6 @@ function toggleVideo() {
     }
 }
 
-function showProps(obj) {
-    let result = '';
-    for (let i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            result += `${obj}.${i} = ${obj[i]}\n`;
-        }
-    }
-    console.log(result);
-}
-
-
 function runDetection() {
     model.detect(video).then(predictions => {
         //console.log("Predictions: ", predictions);
@@ -59,12 +48,14 @@ function runDetection() {
             predictions.forEach(element => {
                 // Check if object class is closed(2) or pointed(4) hand
                 if (element.class == '4') {
-                    //console.log(element.bbox[0]); // Y
-                    //console.log(element.bbox[1]); // X
+                    //console.log(element.bbox[0]); // X
+                    //console.log(element.bbox[1]); // Y
+                    //console.log(element.bbox[2]); // Width
+                    //console.log(element.bbox[3]); // Height
+                    draw(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]));
                 }
             });
         }
-        //draw(predictions[0], predictions[1]);
         model.renderPredictions(predictions, canvas, context, video);
         if (isVideo) {
             requestAnimationFrame(runDetection);
@@ -72,21 +63,32 @@ function runDetection() {
     });
 }
 
-function draw(posX, posY) {
-    // mouse left button must be pressed
-    if (e.buttons !== 1) return;
+function calcRadius(width, height) {
+    let radius = ((((width + height) / 1000) * 1.5) * 10);
+    //console.log(radius);
+    return radius;
+}
 
-    contextForPainting.beginPath(); // begin
+function calcPointX(posX, width) {
+    let pointX = posX + (width / 2);
+    //console.log('Point X - ' + pointX);
+    return pointX;
+}
 
-    contextForPainting.lineWidth = posX * 0.1;
-    contextForPainting.lineCap = 'round';
-    contextForPainting.strokeStyle = '#c0392b';
+function calcPointY(posY, height) {
+    let pointY = posY + (height / 2);
+    //console.log('Point Y - ' + pointY);
+    return pointY;
+}
 
-    contextForPainting.moveTo(posX, posY); // from
-    //setPosition(e);
-    contextForPainting.lineTo(posX, posY); // to
-
-    contextForPainting.stroke(); // draw it!
+function draw(posY, posX, radius) {
+    //console.log('X - ' + posX + 'Y - ' + posY);
+    //console.log('R - ' + radius);
+    contextForPainting.fillStyle = 'red';
+    contextForPainting.beginPath();
+    contextForPainting.arc(posY / 3, posX / 3, radius, 0, 2 * Math.PI);
+    contextForPainting.closePath();
+    contextForPainting.fill();
 }
 
 // Load the model.
@@ -95,4 +97,21 @@ handTrack.load(modelParams).then(lmodel => {
     model = lmodel
     updateNote.innerText = "Loaded Model!"
     trackButton.disabled = false
+
+    canvasForPainting.addEventListener('click', (e) => {
+
+        let radius = Math.floor(Math.random() * 51 + 50);
+        let color = 'rgb(' +
+            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ', ' +
+            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ', ' +
+            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ')';
+
+        console.log(e);
+        contextForPainting.fillStyle = color;
+        contextForPainting.beginPath();
+        contextForPainting.arc(150, 150, 10, 0, 2 * Math.PI);
+        contextForPainting.closePath();
+        contextForPainting.fill();
+    })
+
 });
