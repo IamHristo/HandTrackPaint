@@ -4,11 +4,14 @@ const context = canvas.getContext("2d");
 const canvasForPainting = document.getElementById("canvasForPainting");
 const contextForPainting = canvasForPainting.getContext("2d");
 const colorPicker = document.getElementById("colorPicker");
+const customOrangeColor = 'rgb(245,147,20)';
+const blackColor = 'rgb(0,0,0)';
+const blackColorTransperent = 'rgb(0,0,0,100)';
 let trackButton = document.getElementById("trackbutton");
 let updateNote = document.getElementById("updatenote");
 let color;
-
 let isVideo = false;
+let isDrawOnVideo = false;
 let model = null;
 
 const modelParams = {
@@ -33,10 +36,12 @@ function startVideo() {
 
 function toggleVideo() {
     if (!isVideo) {
-        updateNote.innerText = "Starting video"
+        updateNote.innerText = "Starting video";
+        updateNote.style.background = customOrangeColor;
         startVideo();
     } else {
         updateNote.innerText = "Stopping video"
+        updateNote.style.background = blackColor;
         handTrack.stopVideo(video)
         isVideo = false;
         updateNote.innerText = "Video stopped"
@@ -45,7 +50,7 @@ function toggleVideo() {
 
 function runDetection() {
     model.detect(video).then(predictions => {
-        console.log("Predictions: ", predictions);
+        //console.log("Predictions: ", predictions);
         if (predictions.length != 0) {
             predictions.forEach(element => {
                 // Check if object class is closed(2), open(1) or pointed(4) hand
@@ -55,7 +60,7 @@ function runDetection() {
                     //console.log(element.bbox[2]); // Width
                     //console.log(element.bbox[3]); // Height
                     draw(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]), color);
-                } else if (element.class == '1') {
+                } else if (element.class == '1' && !isDrawOnVideo) {
                     erase(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]));
                 }
             });
@@ -75,7 +80,8 @@ function calcRadius(width, height) {
 
 function calcPointX(posX, width) {
     let pointX = posX + (width / 2);
-    //console.log('Point X - ' + pointX);
+    //let pointX = posX;
+    console.log('Point X - ' + pointX);
     return pointX;
 }
 
@@ -95,7 +101,23 @@ function draw(posY, posX, radius, color) {
 
 function erase(posY, posX, radius) {
     console.log('erase');
-    draw(posY, posX, radius, 'black');
+    draw(posY, posX, radius, blackColor);
+}
+
+function drawOnVideo() {
+    let button = document.getElementById('drawOnVideoButton');
+    if (!isDrawOnVideo) {
+        button.style.background = customOrangeColor;
+        canvasForPainting.classList.add("canvasOverVideo");
+        canvasForPainting.style.background = 'transparent';
+        canvasForPainting.style.opacity = 1;
+        isDrawOnVideo = true;
+    } else {
+        button.style.background = blackColor;
+        canvasForPainting.classList.remove("canvasOverVideo");
+        canvasForPainting.style.background = blackColor;
+        isDrawOnVideo = false;
+    }
 }
 
 // Load the model.

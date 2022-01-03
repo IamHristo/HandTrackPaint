@@ -16,6 +16,12 @@ body {
     background: black;
 }
 
+.canvasOverVideo {
+    position: absolute;
+    left: 33px;
+    z-index: 999;
+}
+
 .mb10 {
     margin-bottom: 10px
 }
@@ -24,9 +30,19 @@ body {
     margin-top: 10px
 }
 
+#colorPicker {
+    height: 50px;
+}
+
 .updatenote {
-    padding: 10px;
+    width: 160px;
+    padding: 20px;
     background: rgb(245, 147, 20);
     color: white;
-    display: inline;
+}
+
+.videobox {
+    visibility: collapse !important;
+    width: 0px !important;
+    height: 0px !important;
 }
