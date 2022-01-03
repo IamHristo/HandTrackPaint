@@ -23,7 +23,6 @@ const modelParams = {
 
 function startVideo() {
     handTrack.startVideo(video).then(function(status) {
-        console.log("video started", status);
         if (status) {
             updateNote.innerText = "Video started. Now tracking"
             isVideo = true
@@ -50,15 +49,9 @@ function toggleVideo() {
 
 function runDetection() {
     model.detect(video).then(predictions => {
-        //console.log("Predictions: ", predictions);
         if (predictions.length != 0) {
             predictions.forEach(element => {
-                // Check if object class is closed(2), open(1) or pointed(4) hand
                 if (element.class == '4') {
-                    //console.log(element.bbox[0]); // X
-                    //console.log(element.bbox[1]); // Y
-                    //console.log(element.bbox[2]); // Width
-                    //console.log(element.bbox[3]); // Height
                     draw(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]), color);
                 } else if (element.class == '1' && !isDrawOnVideo) {
                     erase(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]));
@@ -74,20 +67,16 @@ function runDetection() {
 
 function calcRadius(width, height) {
     let radius = ((((width + height) / 1000) * 1.5) * 10);
-    //console.log(radius);
     return radius;
 }
 
 function calcPointX(posX, width) {
     let pointX = posX + (width / 2);
-    //let pointX = posX;
-    console.log('Point X - ' + pointX);
     return pointX;
 }
 
 function calcPointY(posY, height) {
     let pointY = posY + (height / 2);
-    //console.log('Point Y - ' + pointY);
     return pointY;
 }
 
@@ -100,7 +89,6 @@ function draw(posY, posX, radius, color) {
 }
 
 function erase(posY, posX, radius) {
-    console.log('erase');
     draw(posY, posX, radius, blackColor);
 }
 
