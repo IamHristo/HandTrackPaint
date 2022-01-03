@@ -92,7 +92,7 @@ function erase(posY, posX, radius) {
     draw(posY, posX, radius, blackColor);
 }
 
-function drawOnVideo() {
+function drawOverVideo() {
     let button = document.getElementById('drawOnVideoButton');
     if (!isDrawOnVideo) {
         button.style.background = customOrangeColor;
