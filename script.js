@@ -95,6 +95,7 @@ function draw(posY, posX, radius, color) {
     contextForPainting.fillStyle = color;
     contextForPainting.beginPath();
     contextForPainting.arc(posY / 3, posX / 3, radius, 0, 2 * Math.PI);
+    //contextForPainting.arc(posY, posX, radius, 0, 2 * Math.PI);
     contextForPainting.closePath();
     contextForPainting.fill();
 }
@@ -104,7 +105,7 @@ function erase(posY, posX, radius) {
     draw(posY, posX, radius, blackColor);
 }
 
-function drawOnVideo() {
+function drawOverVideo() {
     let button = document.getElementById('drawOnVideoButton');
     if (!isDrawOnVideo) {
         button.style.background = customOrangeColor;
