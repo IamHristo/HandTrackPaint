@@ -3,8 +3,10 @@ const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 const canvasForPainting = document.getElementById("canvasForPainting");
 const contextForPainting = canvasForPainting.getContext("2d");
+const colorPicker = document.getElementById("colorPicker");
 let trackButton = document.getElementById("trackbutton");
 let updateNote = document.getElementById("updatenote");
+let color;
 
 let isVideo = false;
 let model = null;
@@ -43,16 +45,18 @@ function toggleVideo() {
 
 function runDetection() {
     model.detect(video).then(predictions => {
-        //console.log("Predictions: ", predictions);
+        console.log("Predictions: ", predictions);
         if (predictions.length != 0) {
             predictions.forEach(element => {
-                // Check if object class is closed(2) or pointed(4) hand
+                // Check if object class is closed(2), open(1) or pointed(4) hand
                 if (element.class == '4') {
                     //console.log(element.bbox[0]); // X
                     //console.log(element.bbox[1]); // Y
                     //console.log(element.bbox[2]); // Width
                     //console.log(element.bbox[3]); // Height
-                    draw(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]));
+                    draw(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]), color);
+                } else if (element.class == '1') {
+                    erase(calcPointX(element.bbox[0], element.bbox[2]), calcPointY(element.bbox[1], element.bbox[3]), calcRadius(element.bbox[2], element.bbox[3]));
                 }
             });
         }
@@ -81,37 +85,28 @@ function calcPointY(posY, height) {
     return pointY;
 }
 
-function draw(posY, posX, radius) {
-    //console.log('X - ' + posX + 'Y - ' + posY);
-    //console.log('R - ' + radius);
-    contextForPainting.fillStyle = 'red';
+function draw(posY, posX, radius, color) {
+    contextForPainting.fillStyle = color;
     contextForPainting.beginPath();
     contextForPainting.arc(posY / 3, posX / 3, radius, 0, 2 * Math.PI);
     contextForPainting.closePath();
     contextForPainting.fill();
 }
 
+function erase(posY, posX, radius) {
+    console.log('erase');
+    draw(posY, posX, radius, 'black');
+}
+
 // Load the model.
 handTrack.load(modelParams).then(lmodel => {
     // detect objects in the image.
-    model = lmodel
-    updateNote.innerText = "Loaded Model!"
-    trackButton.disabled = false
+    model = lmodel;
+    updateNote.innerText = "Loaded Model!";
+    trackButton.disabled = false;
 
-    canvasForPainting.addEventListener('click', (e) => {
-
-        let radius = Math.floor(Math.random() * 51 + 50);
-        let color = 'rgb(' +
-            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ', ' +
-            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ', ' +
-            Math.floor(Math.random() * (255 - 50 + 1) + 50) + ')';
-
-        console.log(e);
-        contextForPainting.fillStyle = color;
-        contextForPainting.beginPath();
-        contextForPainting.arc(150, 150, 10, 0, 2 * Math.PI);
-        contextForPainting.closePath();
-        contextForPainting.fill();
-    })
-
+    color = colorPicker.value;
+    colorPicker.addEventListener('change', function() {
+        color = this.value;
+    });
 });
